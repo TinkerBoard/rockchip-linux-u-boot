@@ -78,15 +78,6 @@ int check_force_enter_ums_mode(void)
 	writel(tmp & ~(0x20), RKIO_GPIO6_PHYS + GPIO_SWPORT_DDR);
 
 	mdelay(10);
-
-	printf("PC event = 0x%x\n", readl(RKIO_GPIO6_PHYS + GPIO_EXT_PORT)&0x20);
-	if((readl(RKIO_GPIO6_PHYS + GPIO_EXT_PORT)&0x20)==0x20) {
-		// SDP detected
-		printf("usb connected to SDP, should enter ums mode\n");
-		return 1;
-	} else {
-		usb_current_limit_unlock(false);
-	}
 	return 0;
 }
 
@@ -292,6 +283,8 @@ int rockchip_get_boot_mode(void)
 int setup_boot_mode(void)
 {
 	char env_preboot[256] = {0};
+	printf("unlock usb current limit\n");
+	usb_current_limit_unlock(true);
 
 	int boot_mode = rockchip_get_boot_mode();
 
