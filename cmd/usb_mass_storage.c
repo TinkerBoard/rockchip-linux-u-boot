@@ -127,10 +127,8 @@ static int ums_init(const char *devtype, const char *devnums_part_str)
 cleanup:
 	free(s);
 
-	if (ret < 0) {
+	if (ret < 0)
 		ums_fini();
-		usb_current_limit_unlock(false);
-	}
 
 	return ret;
 }
@@ -157,7 +155,6 @@ static int do_usb_mass_storage(cmd_tbl_t *cmdtp, int flag,
 		devnum  = argv[2];
 	}
 
-	usb_current_limit_unlock(true);
 	rk3288_maskrom_disable(true);
 
 	rc = ums_init(devtype, devnum);
@@ -246,7 +243,6 @@ cleanup_ums_init:
 	ums_fini();
 
 	rk3288_maskrom_disable(false);
-	usb_current_limit_unlock(false);
 
 	return rc;
 }

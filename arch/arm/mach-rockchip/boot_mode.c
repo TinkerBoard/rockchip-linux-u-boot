@@ -283,8 +283,6 @@ int rockchip_get_boot_mode(void)
 int setup_boot_mode(void)
 {
 	char env_preboot[256] = {0};
-	printf("unlock usb current limit\n");
-	usb_current_limit_unlock(true);
 
 	int boot_mode = rockchip_get_boot_mode();
 
