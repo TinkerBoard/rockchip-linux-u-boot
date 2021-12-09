@@ -84,8 +84,6 @@ int check_force_enter_ums_mode(void)
 		// SDP detected
 		printf("usb connected to SDP, should enter ums mode\n");
 		return 1;
-	} else {
-		usb_current_limit_unlock(false);
 	}
 	return 0;
 }
