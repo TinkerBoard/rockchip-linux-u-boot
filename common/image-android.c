@@ -24,6 +24,8 @@
 #include <android_avb/rk_avb_ops_user.h>
 #endif
 #include <optee_include/OpteeClientInterface.h>
+#include <asm/io.h>
+#include <asm/arch-rockchip/gpio.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -36,6 +38,23 @@ DECLARE_GLOBAL_DATA_PTR;
 		((_num_bytes + _block_size - 1) / _block_size)
 
 #define MAX_OVERLAY_NAME_LENGTH 128
+
+int read_pcbid(void)
+{
+	int pcbid, tmp;
+
+	/* GPIO2_A3/GPIO2_A2/GPIO2_A1/GPIO2_B2/GPIO2_B1/GPIO2_B0 set to input */
+	tmp = readl(RKIO_GPIO2_PHYS + GPIO_SWPORT_DDR);
+	writel(tmp & ~(0x70E), RKIO_GPIO2_PHYS + GPIO_SWPORT_DDR);
+
+	mdelay(10);
+
+	/* read GPIO2_B2/GPIO2_B1/GPIO2_B0 value */
+	pcbid = (readl(RKIO_GPIO2_PHYS + GPIO_EXT_PORT) & 0x700) >> 8;
+	printf("pcbid = %d\n", pcbid);
+
+	return pcbid;
+}
 
 struct hw_config
 {
@@ -1337,7 +1356,7 @@ static int android_image_separate(struct andr_img_hdr *hdr,
 				  void *ram_base)
 {
 	ulong bstart;
-	int ret;
+	int ret, pcbid;
 
 	parse_cmdline();
 
@@ -1443,6 +1462,15 @@ static int android_image_separate(struct andr_img_hdr *hdr,
 	if (working_fdt != NULL) {
 		if(hw_conf.valid)
 			handle_hw_conf(NULL, working_fdt, &hw_conf);
+
+		pcbid = read_pcbid();
+		if (pcbid == 6) {
+			set_hw_property(working_fdt, "/sound@ff8b0000", "status", "okay", 5);
+			set_hw_property(working_fdt, "/spdif-sound", "status", "okay", 5);
+			set_hw_property(working_fdt, "/es8316-sound", "status", "okay", 5);
+			set_hw_property(working_fdt, "/i2c@ff660000/es8316@11", "status", "okay", 5);
+		} else
+			set_hw_property(working_fdt, "/sound-simple-card", "status", "okay", 5);
 	}
 
 	return 0;
