@@ -2423,7 +2423,7 @@ int rockchip_dw_hdmi_get_timing(struct display_state *state)
 	unsigned int bus_format;
 	unsigned long enc_out_encoding;
 	struct overscan *overscan = &conn_state->overscan;
-	const u8 def_modes_vic[6] = {4, 16, 2, 17, 31, 19};
+	const u8 def_modes_vic[1] = {4};
 
 	if (!hdmi)
 		return -EFAULT;
@@ -2437,7 +2437,7 @@ int rockchip_dw_hdmi_get_timing(struct display_state *state)
 		ret = drm_add_edid_modes(&hdmi->edid_data, conn_state->edid);
 	}
 	if (ret < 0) {
-		hdmi->sink_is_hdmi = true;
+		hdmi->sink_is_hdmi = false;
 		hdmi->sink_has_audio = true;
 		do_cea_modes(&hdmi->edid_data, def_modes_vic,
 			     sizeof(def_modes_vic));
