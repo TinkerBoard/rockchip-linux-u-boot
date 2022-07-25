@@ -782,6 +782,8 @@ static void handle_adc5_bid(cmd_tbl_t *cmdtp, struct fdt_header *working_fdt, st
 		set_hw_property(working_fdt, "/ADC5-BOARD-ID", "boardver", "3", 2);
 	else if (hw_conf->adc5_bid == 4)
 		set_hw_property(working_fdt, "/ADC5-BOARD-ID", "boardver", "4", 2);
+	else if (hw_conf->adc5_bid == 5)
+		set_hw_property(working_fdt, "/ADC5-BOARD-ID", "boardver", "5", 2);
 }
 
 static void handle_hw_conf(cmd_tbl_t *cmdtp, struct fdt_header *working_fdt, struct hw_config *hw_conf)
@@ -1407,6 +1409,8 @@ static int android_image_separate(struct andr_img_hdr *hdr,
 			hw_conf.adc5_bid = 4;
 		else if (vresult < 1000 && vresult > 800)
 			hw_conf.adc5_bid = 1;
+		else if (vresult < 700 && vresult > 500)
+			hw_conf.adc5_bid = 5;
 		else if (vresult < 100)
 			hw_conf.adc5_bid = 3;
 		else
