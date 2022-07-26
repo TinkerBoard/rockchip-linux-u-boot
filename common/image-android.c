@@ -46,7 +46,7 @@ struct hw_config
 	int pwm0, pwm1, pwm3a;
 	int spdif;
 
-	int ums, gmac, adc5_bid;
+	int ums, gmac, adc5_bid, adc5_vcc;
 
 	int overlay_count;
 	char **overlay_file;
@@ -784,6 +784,10 @@ static void handle_adc5_bid(cmd_tbl_t *cmdtp, struct fdt_header *working_fdt, st
 		set_hw_property(working_fdt, "/ADC5-BOARD-ID", "boardver", "4", 2);
 	else if (hw_conf->adc5_bid == 5)
 		set_hw_property(working_fdt, "/ADC5-BOARD-ID", "boardver", "5", 2);
+
+	char vcc[4];
+	sprintf(vcc, "%d", hw_conf->adc5_vcc);
+	set_hw_property(working_fdt, "/ADC5-BOARD-ID", "adc5-vcc", vcc, strlen(vcc) + 1);
 }
 
 static void handle_hw_conf(cmd_tbl_t *cmdtp, struct fdt_header *working_fdt, struct hw_config *hw_conf)
@@ -1397,9 +1401,10 @@ static int android_image_separate(struct andr_img_hdr *hdr,
 	}
 
 	ret = adc_channel_single_shot("saradc", adc5_channel, &in_voltage5_raw);
-	if (ret)
+	if (ret) {
 		hw_conf.adc5_bid = -1;
-	else {
+		hw_conf.adc5_vcc = -1;
+	} else {
 		voltage5_raw = (float)in_voltage5_raw;
 		vresult = voltage5_raw * voltage_scale;
 
@@ -1415,6 +1420,8 @@ static int android_image_separate(struct andr_img_hdr *hdr,
 			hw_conf.adc5_bid = 3;
 		else
 			hw_conf.adc5_bid = 0;
+
+		hw_conf.adc5_vcc = (int)vresult / 100;
 	}
 
 	if (android_image_check_header(hdr)) {
