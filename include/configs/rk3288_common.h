@@ -66,6 +66,8 @@
 	"kernel_addr_r=0x02008000\0" \
 	"ramdisk_addr_r=0x0a200000\0"
 
+#define CONFIG_ENV_OVERWRITE	1
+
 #include <config_distro_bootcmd.h>
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
