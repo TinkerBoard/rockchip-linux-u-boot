@@ -923,6 +923,12 @@ int arch_cpu_init(void)
 	writel((0x07770111), GRF_BASE + GRF_GPIO1C_IOMUX_H);
 #endif
 #endif
+        /* emmc and sfc iomux */
+        writel((0x7777UL << 16) | (0x1111), GRF_BASE + GRF_GPIO1B_IOMUX_H);
+        writel((0x7777UL << 16) | (0x1111), GRF_BASE + GRF_GPIO1C_IOMUX_L);
+        writel((0x7777UL << 16) | (0x2111), GRF_BASE + GRF_GPIO1C_IOMUX_H);
+        writel((0x7777UL << 16) | (0x1111), GRF_BASE + GRF_GPIO1D_IOMUX_L);
+        writel(((7 << 0) << 16) | (1 << 0), GRF_BASE + GRF_GPIO1D_IOMUX_H);
 
 	return 0;
 }
