@@ -1221,6 +1221,11 @@ static int fdt_fixup_modules(void *blob)
 	return 0;
 }
 
+int rk_board_dm_fdt_fixup(const void *blob)
+{
+	return fdt_fixup_modules((void *)blob);
+}
+
 int rk_board_fdt_fixup(const void *blob)
 {
 	int node;
@@ -1233,8 +1238,6 @@ int rk_board_fdt_fixup(const void *blob)
 			writel(0x00000100, RK3588_PHY_CONFIG);
 		}
 	}
-
-	fdt_fixup_modules((void *)blob);
 
 	return 0;
 }
