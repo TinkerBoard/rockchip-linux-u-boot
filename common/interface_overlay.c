@@ -42,33 +42,12 @@ static unsigned long get_append(char *text)
 	}
 
 	if (append_len) {
-		int len = 0;
-		char *append;
+		char *append = (char*)calloc(append_len, sizeof(char));
 
-		char *bootargs = env_get("bootargs");
-		if (bootargs)
-			len += strlen(bootargs);
-
-		append = (char*)calloc(append_len, sizeof(char));
 		memcpy(append, text, append_len);
-
-		len += append_len;
-
-		char *newbootargs = malloc(len + 2);
-		*newbootargs = '\0';
-
-		if (bootargs) {
-			strcpy(newbootargs, bootargs);
-			strcat(newbootargs, " ");
-		}
-
-		strcat(newbootargs, append);
 		printf("get append cmdline: %s\n", append);
-
-		env_set("bootargs", newbootargs);
-
+		env_update("bootargs", append);
 		free(append);
-		free(newbootargs);
 	}
 
 	return i;
@@ -156,6 +135,25 @@ static unsigned long hw_parse_property(char *text, struct hw_config *hw_conf)
 		}
 	}
 	return i;
+}
+
+void set_mmcroot(void)
+{
+	char *rootmmc0 = "root=/dev/mmcblk0p7"; /* eMMC Boot */
+	char *rootmmc1 = "root=/dev/mmcblk1p7"; /* SDcard Boot */
+
+	char *devtype = env_get("devtype");
+	char *devnum = env_get("devnum");
+
+	if (!strcmp(devtype, "mmc")) {
+		if (!strcmp(devnum, "0")) {
+			printf("Set %s\n", rootmmc0);
+			env_update("bootargs", rootmmc0);
+		} else if (!strcmp(devnum, "1")) {
+			printf("Set %s\n", rootmmc1);
+			env_update("bootargs", rootmmc1);
+		}
+	}
 }
 
 void parse_cmdline(void)
