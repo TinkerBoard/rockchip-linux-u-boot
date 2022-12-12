@@ -18,6 +18,7 @@
 #include <mapmem.h>
 #include <asm/io.h>
 #include <sysmem.h>
+#include "interface_overlay.h"
 
 #ifndef CONFIG_SYS_FDT_PAD
 #define CONFIG_SYS_FDT_PAD 0x3000
@@ -226,6 +227,20 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 	int	err;
 	int	disable_relocation = 0;
 
+	parse_cmdline();
+	struct fdt_header *working_fdt;
+	struct hw_config hw_conf;
+	memset(&hw_conf, 0, sizeof(struct hw_config));
+	parse_hw_config(&hw_conf);
+
+	printf("config.txt valid = %d\n", hw_conf.valid);
+	if(hw_conf.valid == 1) {
+		printf("config on: 1, config off: -1, no config: 0\n");
+
+		for (int i = 0; i < hw_conf.overlay_count; i++)
+			printf("get overlay name: %s\n", hw_conf.overlay_file[i]);
+	}
+
 	/* nothing to do */
 	if (*of_size == 0)
 		return 0;
@@ -306,6 +321,13 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 #ifdef CONFIG_CMD_FDT
 	set_working_fdt_addr((ulong)*of_flat_tree);
 #endif
+
+	working_fdt = resize_working_fdt();
+	if(working_fdt != NULL) {
+		if(hw_conf.valid)
+			handle_hw_conf(NULL, working_fdt, &hw_conf);
+	}
+
 	return 0;
 
 error:
