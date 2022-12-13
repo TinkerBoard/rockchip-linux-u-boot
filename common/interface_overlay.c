@@ -5,6 +5,19 @@
 
 #define MAX_OVERLAY_NAME_LENGTH 128
 
+static char *devtype, *devnum, *file_addr;
+static unsigned long fdt_addr_r;
+
+static void verify_devinfo(void)
+{
+	if (!devtype || !devnum || !file_addr || !fdt_addr_r) {
+		devtype = env_get("devtype");
+		devnum = env_get("devnum");
+		file_addr = env_get("temp_file_addr");
+		fdt_addr_r = env_get_ulong("fdt_addr_r", 16, 0);
+	}
+}
+
 static unsigned long hw_skip_comment(char *text)
 {
 	int i = 0;
@@ -142,8 +155,7 @@ void set_mmcroot(void)
 	char *rootmmc0 = "root=/dev/mmcblk0p7"; /* eMMC Boot */
 	char *rootmmc1 = "root=/dev/mmcblk1p7"; /* SDcard Boot */
 
-	char *devtype = env_get("devtype");
-	char *devnum = env_get("devnum");
+	verify_devinfo();
 
 	if (!strcmp(devtype, "mmc")) {
 		if (!strcmp(devnum, "0")) {
@@ -159,22 +171,11 @@ void set_mmcroot(void)
 void parse_cmdline(void)
 {
 	unsigned long count, offset = 0, addr, size;
-	char *file_addr, *devnum;
 	static char *fs_argv[5];
 
 	int valid = 0;
 
-	devnum = env_get("devnum");
-	if (!devnum) {
-		printf("Can't get devnum\n");
-		goto end;
-	}
-
-	file_addr = env_get("cmdline_addr");
-	if (!file_addr) {
-		printf("Can't get cmdline_addr address\n");
-		goto end;
-	}
+	verify_devinfo();
 
 	addr = simple_strtoul(file_addr, NULL, 16);
 	if (!addr)
@@ -238,22 +239,11 @@ end:
 void parse_hw_config(struct hw_config *hw_conf)
 {
 	unsigned long count, offset = 0, addr, size;
-	char *file_addr, *devnum;
 	static char *fs_argv[5];
 
 	int valid = 0;
 
-	devnum = env_get("devnum");
-	if (!devnum) {
-		printf("Can't get devnum\n");
-		goto end;
-	}
-
-	file_addr = env_get("conf_addr");
-	if (!file_addr) {
-		printf("Can't get conf_addr address\n");
-		goto end;
-	}
+	verify_devinfo();
 
 	addr = simple_strtoul(file_addr, NULL, 16);
 	if (!addr)
@@ -315,16 +305,11 @@ end:
 struct fdt_header *resize_working_fdt(void)
 {
 	struct fdt_header *working_fdt;
-	unsigned long file_addr;
 	int err;
 
-	file_addr = env_get_ulong("fdt_addr_r", 16, 0);
-	if (!file_addr) {
-		printf("Can't get fdt address\n");
-		return NULL;
-	}
+	verify_devinfo();
 
-	working_fdt = map_sysmem(file_addr, 0);
+	working_fdt = map_sysmem(fdt_addr_r, 0);
 	err = fdt_open_into(working_fdt, working_fdt, (1024 * 1024));
 	if (err != 0) {
 		printf("libfdt fdt_open_into(): %s\n", fdt_strerror(err));
@@ -375,26 +360,17 @@ static int fdt_valid(struct fdt_header **blobp)
 static int merge_dts_overlay(cmd_tbl_t *cmdtp, struct fdt_header *working_fdt, char *overlay_name)
 {
 	unsigned long addr;
-	char *file_addr, *devnum;
 	struct fdt_header *blob;
 	int ret;
 	char overlay_file[MAX_OVERLAY_NAME_LENGTH] = "overlays/";
 
 	static char *fs_argv[5];
 
-	devnum = env_get("devnum");
-	if (!devnum) {
-		printf("Can't get devnum\n");
-		goto fail;
-	}
-
-	file_addr = env_get("fdt_overlay_addr");
-	if (!file_addr) {
-		printf("Can't get fdt overlay address\n");
-		goto fail;
-	}
+	verify_devinfo();
 
 	addr = simple_strtoul(file_addr, NULL, 16);
+	if (!addr)
+		printf("Can't set addr\n");
 
 	strcat(overlay_file, overlay_name);
 	strncat(overlay_file, ".dtbo", 6);
