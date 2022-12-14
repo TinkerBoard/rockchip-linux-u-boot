@@ -327,6 +327,8 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 	if(working_fdt != NULL) {
 		if(hw_conf.valid)
 			handle_hw_conf(NULL, working_fdt, &hw_conf);
+
+		set_lan_status();
 	}
 
 	return 0;

@@ -9,6 +9,8 @@ struct hw_config
 	char **overlay_file;
 };
 
+void set_lan_status(void);
+
 void set_mmcroot(void);
 
 void parse_cmdline(void);
