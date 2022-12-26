@@ -253,6 +253,7 @@
 #include <usb_mass_storage.h>
 #include <rockusb.h>
 
+#include <asm/io.h>
 #include <asm/unaligned.h>
 #include <linux/bitops.h>
 #include <linux/usb/gadget.h>
@@ -282,6 +283,10 @@ static const char fsg_string_interface[] = "Mass Storage";
 #define PAGE_CACHE_SIZE		(1 << PAGE_CACHE_SHIFT)
 #define kthread_create(...)	__builtin_return_address(0)
 #define wait_for_completion(...) do {} while (0)
+
+#if defined(CONFIG_ROCKCHIP_RK3568)
+#define CONFIG_USBPHY_U3_GRF_STATUS_REG  0xfdca00c0
+#endif
 
 struct kref {int x; };
 struct completion {int x; };
@@ -650,6 +655,51 @@ static int sleep_thread(struct fsg_common *common)
 {
 	int	rc = 0;
 	int i = 0, k = 0;
+#ifdef CONFIG_ROCKCHIP_RK3568
+	uint32_t reg_usbphy_u3_status;
+#endif
+
+	/* Wait until a signal arrives or we are woken up */
+	for (;;) {
+		if (common->thread_wakeup_needed)
+			break;
+
+		if (++i == 20000) {
+			busy_indicator();
+			i = 0;
+			k++;
+		}
+
+		if (k == 10) {
+			/* Handle CTRL+C */
+			if (ctrlc())
+				return -EPIPE;
+
+			/* Check cable connection */
+			if (!g_dnl_board_usb_cable_connected())
+				return -EIO;
+
+#ifdef CONFIG_ROCKCHIP_RK3568
+                        reg_usbphy_u3_status = readl((void *)CONFIG_USBPHY_U3_GRF_STATUS_REG);
+                        if (!(reg_usbphy_u3_status & (1 << 9))) {
+                                printf("Usb cable disconnected, exit ums.\n");
+                                return -EIO;
+                        }
+#endif
+
+			k = 0;
+		}
+
+		usb_gadget_handle_interrupts(0);
+	}
+	common->thread_wakeup_needed = 0;
+	return rc;
+}
+
+static int sleep_thread_timeout(struct fsg_common *common)
+{
+	int rc = 0;
+	int i = 0, k = 0, j = 0;
 
 	/* Wait until a signal arrives or we are woken up */
 	for (;;) {
@@ -672,7 +722,11 @@ static int sleep_thread(struct fsg_common *common)
 				return -EIO;
 
 			k = 0;
+			j++;
 		}
+
+		if (j == 40) //about 3 seconds
+			return -ETIMEDOUT;
 
 		usb_gadget_handle_interrupts(0);
 	}
@@ -2430,7 +2484,7 @@ int fsg_main_thread(void *common_)
 		}
 
 		if (!common->running) {
-			ret = sleep_thread(common);
+			ret = sleep_thread_timeout(common);
 			if (ret)
 				return ret;
 
