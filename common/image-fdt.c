@@ -247,6 +247,7 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 		printf("intf.spdif_8ch = %d\n", hw_conf.spdif_8ch);
 		printf("intf.spi3 = %d\n", hw_conf.spi3);
 		printf("intf.i2s3_2ch = %d\n", hw_conf.i2s3_2ch);
+		printf("conf.auto_ums = %d\n", hw_conf.auto_ums);
 
 		for (int i = 0; i < hw_conf.overlay_count; i++)
 			printf("get overlay name: %s\n", hw_conf.overlay_file[i]);

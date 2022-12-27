@@ -2,7 +2,7 @@
 #include <malloc.h>
 #include <mapmem.h>
 #include <adc.h>
-#include "interface_overlay.h"
+#include <interface_overlay.h>
 
 #define MAX_OVERLAY_NAME_LENGTH	128
 #define SARADC_DETECT_NUM	2
@@ -230,6 +230,40 @@ invalid_line:
 	return i;
 }
 
+static unsigned long get_conf_value(char *text, struct hw_config *hw_conf)
+{
+	int i = 0;
+	if (memcmp(text, "auto_ums=", 9) == 0) {
+		i = 9;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->auto_ums = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->auto_ums = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else
+		goto invalid_line;
+
+	while(*(text + i) != 0x00)
+	{
+		if(*(text + (i++)) == 0x0a)
+			break;
+	}
+	return i;
+
+invalid_line:
+	//It's not a legal line, skip it.
+	//printf("get_value: illegal line\n");
+	while(*(text + i) != 0x00)
+	{
+		if(*(text + (i++)) == 0x0a)
+			break;
+	}
+	return i;
+}
+
 static int set_hw_property(struct fdt_header *working_fdt, char *path, char *property, char *value, int length)
 {
 	int offset;
@@ -349,6 +383,9 @@ static unsigned long hw_parse_property(char *text, struct hw_config *hw_conf)
 	if(memcmp(text, "intf:", 5) == 0) {
 		i = 5;
 		i = i + get_intf_value(text + i, hw_conf);
+	} else if (memcmp(text, "conf:",  5) == 0) {
+		i = 5;
+		i = i + get_conf_value(text + i, hw_conf);
 	} else if(memcmp(text, "overlay=", 8) == 0) {
 		i = 8;
 		get_overlay_count(text + i, hw_conf);
@@ -467,25 +504,26 @@ void parse_hw_config(struct hw_config *hw_conf)
 
 	int valid = 0;
 
-	verify_devinfo();
+	char *tdevnum = env_get("devnum");
+	char *tfile_addr = env_get("temp_file_addr");
 
-	addr = simple_strtoul(file_addr, NULL, 16);
+	addr = simple_strtoul(tfile_addr, NULL, 16);
 	if (!addr)
 		printf("Can't set addr\n");
 
 	fs_argv[0] = "ext2load";
 	fs_argv[1] = "mmc";
 
-	if (!strcmp(devnum, "0"))
+	if (!strcmp(tdevnum, "0"))
 		fs_argv[2] = "0:6";
-	else if (!strcmp(devnum, "1"))
+	else if (!strcmp(tdevnum, "1"))
 		fs_argv[2] = "1:6";
 	else {
 		printf("Invalid devnum\n");
 		goto end;
 	}
 
-	fs_argv[3] = file_addr;
+	fs_argv[3] = tfile_addr;
 	fs_argv[4] = "config.txt";
 
 	if (do_ext2load(NULL, 0, 5, fs_argv)) {
@@ -502,7 +540,7 @@ void parse_hw_config(struct hw_config *hw_conf)
 	valid = 1;
 	printf("config.txt size = %lu\n", size);
 
-	*((char *)file_addr + size) = 0x00;
+	*((char *)tfile_addr + size) = 0x00;
 
 	while(offset != size)
 	{
