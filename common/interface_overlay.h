@@ -5,6 +5,10 @@ struct hw_config
 {
 	int valid;
 
+	int uart4, uart9;
+	int i2c5, i2s3_2ch, spi3, spdif_8ch;
+	int pwm12, pwm13, pwm14, pwm15;
+
 	int overlay_count;
 	char **overlay_file;
 };

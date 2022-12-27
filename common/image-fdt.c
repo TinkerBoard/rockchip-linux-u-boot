@@ -237,6 +237,16 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 	printf("config.txt valid = %d\n", hw_conf.valid);
 	if(hw_conf.valid == 1) {
 		printf("config on: 1, config off: -1, no config: 0\n");
+		printf("intf.uart4 = %d\n", hw_conf.uart4);
+		printf("intf.i2c5 = %d\n", hw_conf.i2c5);
+		printf("intf.uart9 = %d\n", hw_conf.uart9);
+		printf("intf.pwm12 = %d\n", hw_conf.pwm12);
+		printf("intf.pwm13 = %d\n", hw_conf.pwm13);
+		printf("intf.pwm14 = %d\n", hw_conf.pwm14);
+		printf("intf.pwm15 = %d\n", hw_conf.pwm15);
+		printf("intf.spdif_8ch = %d\n", hw_conf.spdif_8ch);
+		printf("intf.spi3 = %d\n", hw_conf.spi3);
+		printf("intf.i2s3_2ch = %d\n", hw_conf.i2s3_2ch);
 
 		for (int i = 0; i < hw_conf.overlay_count; i++)
 			printf("get overlay name: %s\n", hw_conf.overlay_file[i]);
