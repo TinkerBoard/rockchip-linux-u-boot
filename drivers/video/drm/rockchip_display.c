@@ -780,7 +780,7 @@ static int display_init(struct display_state *state)
 	/*
 	 * support hotplug, but not connect;
 	 */
-#ifdef CONFIG_ROCKCHIP_DRM_TVE
+#ifdef CONFIG_DRM_ROCKCHIP_TVE
 	if (crtc->hdmi_hpd && conn_state->type == DRM_MODE_CONNECTOR_TV) {
 		printf("hdmi plugin ,skip tve\n");
 		goto deinit;
@@ -793,7 +793,7 @@ static int display_init(struct display_state *state)
 #endif
 
 	ret = rockchip_connector_detect(state);
-#if defined(CONFIG_ROCKCHIP_DRM_TVE) || defined(CONFIG_DRM_ROCKCHIP_RK1000)
+#if defined(CONFIG_DRM_ROCKCHIP_TVE) || defined(CONFIG_DRM_ROCKCHIP_RK1000)
 	if (conn_state->type == DRM_MODE_CONNECTOR_HDMIA)
 		crtc->hdmi_hpd = ret;
 #endif
@@ -2002,10 +2002,11 @@ static int rockchip_display_probe(struct udevice *dev)
 						s->crtc_state.crtc->vps[vp_id].plane_mask = ret;
 						s->crtc_state.crtc->assign_plane |= true;
 						s->crtc_state.crtc->vps[vp_id].primary_plane_id =
-							ofnode_read_u32_default(vp_node, "rockchip,primary-plane", -1);
+							ofnode_read_u32_default(vp_node, "rockchip,primary-plane", U8_MAX);
 						printf("get vp%d plane mask:0x%x, primary id:%d, cursor_plane:%d, from dts\n",
 						       vp_id,
 						       s->crtc_state.crtc->vps[vp_id].plane_mask,
+						       s->crtc_state.crtc->vps[vp_id].primary_plane_id == U8_MAX ? -1 :
 						       s->crtc_state.crtc->vps[vp_id].primary_plane_id,
 						       cursor_plane);
 					}
