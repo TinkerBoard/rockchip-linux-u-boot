@@ -157,7 +157,7 @@ static struct edid_quirk {
  * From CEA/CTA-861 spec.
  * Do not access directly, instead always use cea_mode_for_vic().
  */
-static const struct drm_display_mode edid_cea_modes_1[] = {
+static const struct drm_display_mode edid_cea_modes[] = {
 	/* 1 - 640x480@60Hz */
 	{ DRM_MODE(DRM_MODE_TYPE_DRIVER, 25175, 640, 656,
 		   752, 800, 480, 490, 492, 525, 0,
