@@ -34,7 +34,37 @@
 #include <u-boot/sha256.h>
 #include <linux/usb/phy-rockchip-usb2.h>
 
+#define GPIO5_SWPORTA_DDR_REG	0xff7c0004
+#define GPIO5_SWPORTA_DR_REG	0xff7c0000
+#define GPIO6_SWPORTA_DDR_REG	0xff7d0004
+#define GPIO6_SWPORTA_DR_REG	0xff7d0000
+#define GPIO7_SWPORTA_DDR_REG	0xff7e0004
+
 DECLARE_GLOBAL_DATA_PTR;
+
+void rk3288_gpo5c3_gpo6a3_gpi7c6(void)
+{
+	printf("Set GPIO5_C3 and GPIO6_A3 output high\n");
+	printf("Set GPIO7_C6 input low\n");
+
+	uint32_t reg_gpio5a_ddr = readl((void *)GPIO5_SWPORTA_DDR_REG);
+	uint32_t reg_gpio5a_dr = readl((void *)GPIO5_SWPORTA_DR_REG);
+	uint32_t reg_gpio6a_ddr = readl((void *)GPIO6_SWPORTA_DDR_REG);
+	uint32_t reg_gpio6a_dr = readl((void *)GPIO6_SWPORTA_DR_REG);
+	uint32_t reg_gpio7a_ddr = readl((void *)GPIO7_SWPORTA_DDR_REG);
+
+	// Set GPIO5_C3 to direction output.
+	writel(reg_gpio5a_ddr | (1 << 19), GPIO5_SWPORTA_DDR_REG);
+	// Set GPIO6_A3 to direction output.
+	writel(reg_gpio6a_ddr | (1 << 3), GPIO6_SWPORTA_DDR_REG);
+	// Set GPIO7_C6 to direction input.
+	writel(reg_gpio7a_ddr & ~(1 << 22), GPIO7_SWPORTA_DDR_REG);
+
+	// Set GPIO5_C3 to high.
+	writel(reg_gpio5a_dr | (1 << 19), GPIO5_SWPORTA_DR_REG);
+	// Set GPIO6_A3 to high.
+	writel(reg_gpio6a_dr | (1 << 3), GPIO6_SWPORTA_DR_REG);
+}
 
 static void boot_devtype_init(void)
 {
@@ -46,6 +76,8 @@ static void boot_devtype_init(void)
 
 	if (done)
 		return;
+
+	rk3288_gpo5c3_gpo6a3_gpi7c6();
 
 #if defined(CONFIG_SCSI) && defined(CONFIG_CMD_SCSI) && defined(CONFIG_AHCI)
 	ret = run_command("scsi scan", 0);
