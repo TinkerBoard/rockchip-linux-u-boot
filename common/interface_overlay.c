@@ -401,7 +401,7 @@ static unsigned long hw_parse_property(char *text, struct hw_config *hw_conf)
 	return i;
 }
 
-void set_lan_status(void)
+void set_lan_status(struct fdt_header *working_fdt)
 {
 	verify_devinfo();
 
