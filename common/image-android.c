@@ -49,7 +49,7 @@ struct hw_config
 
 	int test_clkout2;
 
-	int gmac;
+	int ums, gmac;
 
 	int overlay_count;
 	char **overlay_file;
@@ -243,6 +243,16 @@ static unsigned long get_conf_value(char *text, struct hw_config *hw_conf)
 			i = i + 2;
 		} else if(memcmp(text + i, "off", 3) == 0) {
 			hw_conf->gmac = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if (memcmp(text, "auto_ums=", 9) == 0) {
+		i = 9;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->ums = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->ums = -1;
 			i = i + 3;
 		} else
 			goto invalid_line;
@@ -1473,9 +1483,15 @@ static int android_image_separate(struct andr_img_hdr *hdr,
 		printf("intf.spdif = %d\n", hw_conf.spdif);
 		printf("intf.test_clkout2 = %d\n", hw_conf.test_clkout2);
 		printf("conf.gmac = %d\n", hw_conf.gmac);
+		printf("conf.ums = %d\n", hw_conf.ums);
 
 		for (int i = 0; i < hw_conf.overlay_count; i++)
 			printf("get overlay name: %s\n", hw_conf.overlay_file[i]);
+	}
+
+	if (rockchip_get_boot_mode() == BOOT_MODE_UMS_HW && hw_conf.ums != -1) {
+		printf("enter UMS!\n");
+		run_command("ums 0 mmc 0", 0);
 	}
 
 	int ret;
