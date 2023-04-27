@@ -209,6 +209,16 @@ static unsigned long get_intf_value(char *text, struct hw_config *hw_conf)
 			i = i + 3;
 		} else
 			goto invalid_line;
+	} else if(memcmp(text, "fiq_debugger=", 13) == 0) {
+		i = 13;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->fiq_debugger = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->fiq_debugger = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
 	} else
 		goto invalid_line;
 
@@ -764,6 +774,11 @@ void handle_hw_conf(cmd_tbl_t *cmdtp, struct fdt_header *working_fdt, struct hw_
 		set_hw_property(working_fdt, "/i2s@fe430000", "status", "okay", 5);
 	else if (hw_conf->i2s3_2ch == -1)
 		set_hw_property(working_fdt, "/i2s@fe430000", "status", "disabled", 9);
+
+	if (hw_conf->fiq_debugger == 1)
+		set_hw_property(working_fdt, "/fiq-debugger", "status", "okay", 5);
+	else if (hw_conf->fiq_debugger == -1)
+		set_hw_property(working_fdt, "/fiq-debugger", "status", "disabled", 9);
 
 	if (hw_conf->com1 == 1)
 		set_hw_property(working_fdt, "/uart0_enable", "status", "okay", 5);
