@@ -210,6 +210,10 @@ int rockchip_get_boot_mode(void)
 			printf("boot mode: watchdog\n");
 			boot_mode[PL] = BOOT_MODE_WATCHDOG;
 			break;
+		case BOOT_QUIESCENT:
+			printf("boot mode: quiescent\n");
+			boot_mode[PL] = BOOT_MODE_QUIESCENT;
+			break;
 		default:
 			{
 #if defined(CONFIG_ROCKCHIP_RK3568)

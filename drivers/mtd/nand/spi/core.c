@@ -837,6 +837,9 @@ static const struct spinand_manufacturer *spinand_manufacturers[] = {
 #ifdef CONFIG_SPI_NAND_ESMT
 	&esmt_spinand_manufacturer,
 #endif
+#ifdef CONFIG_SPI_NAND_XINCUN
+	&xincun_spinand_manufacturer,
+#endif
 #ifdef CONFIG_SPI_NAND_XTX
 	&xtx_spinand_manufacturer,
 #endif
@@ -866,6 +869,9 @@ static const struct spinand_manufacturer *spinand_manufacturers[] = {
 #endif
 #ifdef CONFIG_SPI_NAND_SKYHIGH
 	&skyhigh_spinand_manufacturer,
+#endif
+#ifdef CONFIG_SPI_NAND_GSTO
+	&gsto_spinand_manufacturer,
 #endif
 };
 
