@@ -314,14 +314,17 @@ static int set_hw_property(struct fdt_header *working_fdt, char *path, char *pro
 	return 0;
 }
 
-static unsigned long get_append(char *text)
+static unsigned long get_append(char *text, int *rootset)
 {
 	int i = 0;
 	int append_len = 0;
 
 	while(*(text + i) != 0x00)
 	{
-		if(*(text + i) == 0x0a) {
+		if (memcmp(text, "root=", 5) == 0)
+			*rootset = 1;
+
+		if(*(text + i) == 0x20 || *(text + i) == 0x0a) {
 			append_len = i;
 			i++;
 			break;
@@ -441,30 +444,12 @@ void set_lan_status(struct fdt_header *working_fdt)
 	}
 }
 
-void set_mmcroot(void)
-{
-	char *rootmmc0 = "root=/dev/mmcblk0p7"; /* eMMC Boot */
-	char *rootmmc1 = "root=/dev/mmcblk1p7"; /* SDcard Boot */
-
-	verify_devinfo();
-
-	if (!strcmp(devtype, "mmc")) {
-		if (!strcmp(devnum, "0")) {
-			printf("Set %s\n", rootmmc0);
-			env_update("bootargs", rootmmc0);
-		} else if (!strcmp(devnum, "1")) {
-			printf("Set %s\n", rootmmc1);
-			env_update("bootargs", rootmmc1);
-		}
-	}
-}
-
 void parse_cmdline(void)
 {
 	unsigned long count, offset = 0, addr, size;
 	static char *fs_argv[5];
 
-	int valid = 0;
+	int valid = 0, rootset = 0;
 
 	verify_devinfo();
 
@@ -516,7 +501,7 @@ void parse_cmdline(void)
 			offset = offset + count;
 			continue;
 		}
-		count = get_append((char *)(addr + offset));
+		count = get_append((char *)(addr + offset), &rootset);
 		if(count > 0) {
 			offset = offset + count;
 			continue;
@@ -525,6 +510,13 @@ void parse_cmdline(void)
 
 end:
 	printf("cmdline.txt valid = %d\n", valid);
+
+	if (rootset == 0) {
+		if (!strcmp(devnum, "0"))
+			env_update("bootargs", "root=/dev/mmcblk0p8");	/* eMMC Boot */
+		else if (!strcmp(devnum, "1"))
+			env_update("bootargs", "root=/dev/mmcblk1p8");	/* SDcard Boot */
+	}
 }
 
 void parse_hw_config(struct hw_config *hw_conf)

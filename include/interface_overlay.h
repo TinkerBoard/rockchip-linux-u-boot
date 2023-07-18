@@ -19,8 +19,6 @@ struct hw_config
 
 void set_lan_status(struct fdt_header *);
 
-void set_mmcroot(void);
-
 void parse_cmdline(void);
 
 void parse_hw_config(struct hw_config *);

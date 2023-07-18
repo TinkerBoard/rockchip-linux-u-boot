@@ -248,7 +248,6 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 	int	disable_relocation = 0;
 
 	parse_cmdline();
-	set_mmcroot();
 	struct fdt_header *working_fdt;
 	struct hw_config hw_conf;
 	memset(&hw_conf, 0, sizeof(struct hw_config));
