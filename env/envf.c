@@ -44,16 +44,6 @@ static const char *envf_list[ENVF_MAX];
 #endif
 
 #ifdef CONFIG_DM_MMC
-static int pmbr_part_valid(struct partition *part)
-{
-	if (part->sys_ind == EFI_PMBR_OSTYPE_EFI_GPT &&
-		get_unaligned_le32(&part->start_sect) == 1UL) {
-		return 1;
-	}
-
-	return 0;
-}
-
 static int is_pmbr_valid(legacy_mbr * mbr)
 {
 	int i = 0;
@@ -62,10 +52,10 @@ static int is_pmbr_valid(legacy_mbr * mbr)
 		return 0;
 
 	for (i = 0; i < 4; i++) {
-		if (pmbr_part_valid(&mbr->partition_record[i])) {
+		if (mbr->partition_record[i].sys_ind == 0xc)
 			return 1;
-		}
 	}
+
 	return 0;
 }
 
@@ -76,10 +66,10 @@ static int can_find_pmbr(struct blk_desc *dev_desc)
 	/* Read legacy MBR from block 0 and validate it */
 	if ((blk_dread(dev_desc, 0, 1, (ulong *)legacymbr) != 1)
 		|| (is_pmbr_valid(legacymbr) != 1)) {
-		return -1;
+		return 0;
 	}
 
-	return 0;
+	return 1;
 }
 #endif
 
