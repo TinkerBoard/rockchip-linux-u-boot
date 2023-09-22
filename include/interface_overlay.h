@@ -5,19 +5,27 @@ struct hw_config
 {
 	int valid;
 
+	int fiq_debugger;
+#ifdef CONFIG_RK3568_TB3N
 	int uart4, uart9;
 	int i2c5, i2s3_2ch, spi3, spdif_8ch;
 	int pwm12, pwm13, pwm14, pwm15;
-	int fiq_debugger;
 
 	int com1, com2;
+#endif
+
+#ifdef CONFIG_RK3566_TB3
+	int hdmi, dsi0;
+#endif
 	int auto_ums;
 
 	int overlay_count;
 	char **overlay_file;
 };
 
+#ifdef CONFIG_RK3568_TB3N
 void set_lan_status(struct fdt_header *);
+#endif
 
 void parse_cmdline(void);
 

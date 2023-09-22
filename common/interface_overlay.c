@@ -5,9 +5,12 @@
 #include <interface_overlay.h>
 
 #define MAX_OVERLAY_NAME_LENGTH	128
-#define SARADC_DETECT_NUM	2
 
+#ifdef CONFIG_RK3568_TB3N
+#define SARADC_DETECT_NUM	2
 static int adc4_odmid = -1, adc5_prjid = -1;
+#endif
+
 static char *devtype, *devnum, *file_addr;
 static unsigned long fdt_addr_r;
 
@@ -20,6 +23,7 @@ static void verify_devinfo(void)
 		fdt_addr_r = env_get_ulong("fdt_addr_r", 16, 0);
 	}
 
+#ifdef CONFIG_RK3568_TB3N
 	if (adc4_odmid == -1 || adc5_prjid == -1) {
 		unsigned int in_voltage_raw[SARADC_DETECT_NUM];
 		float voltage_scale = 1.8066, voltage_raw[SARADC_DETECT_NUM], vresult[SARADC_DETECT_NUM];
@@ -53,6 +57,7 @@ static void verify_devinfo(void)
 		adc4_odmid = id[0];
 		adc5_prjid = id[1];
 	}
+#endif
 }
 
 static unsigned long hw_skip_comment(char *text)
@@ -79,6 +84,8 @@ static unsigned long hw_skip_line(char *text)
 static unsigned long get_intf_value(char *text, struct hw_config *hw_conf)
 {
 	int i = 0;
+
+#ifdef CONFIG_RK3568_TB3N
 	if(memcmp(text, "uart4=", 6) == 0) {
 		i = 6;
 		if(memcmp(text + i, "on", 2) == 0) {
@@ -237,6 +244,7 @@ invalid_line:
 		if(*(text + (i++)) == 0x0a)
 			break;
 	}
+#endif
 	return i;
 }
 
@@ -253,6 +261,7 @@ static unsigned long get_conf_value(char *text, struct hw_config *hw_conf)
 			i = i + 3;
 		} else
 			goto invalid_line;
+#ifdef CONFIG_RK3568_TB3N
 	} else if (memcmp(text, "COM1=", 5) == 0) {
 		i = 5;
 		if(memcmp(text + i, "on", 2) == 0) {
@@ -273,6 +282,31 @@ static unsigned long get_conf_value(char *text, struct hw_config *hw_conf)
 			i = i + 3;
 		} else
 			goto invalid_line;
+#endif
+#ifdef CONFIG_RK3566_TB3
+	} else if (memcmp(text, "HDMI=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->hdmi = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			if (hw_conf->dsi0 != -1)
+				hw_conf->hdmi = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if (memcmp(text, "DSI0=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->dsi0 = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->hdmi = 1;
+			hw_conf->dsi0 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+#endif
 	} else
 		goto invalid_line;
 
@@ -434,6 +468,7 @@ static unsigned long hw_parse_property(char *text, struct hw_config *hw_conf)
 	return i;
 }
 
+#ifdef CONFIG_RK3568_TB3N
 void set_lan_status(struct fdt_header *working_fdt)
 {
 	verify_devinfo();
@@ -443,6 +478,7 @@ void set_lan_status(struct fdt_header *working_fdt)
 		set_hw_property(working_fdt, "/ethernet@fe010000", "status", "disabled", 9);
 	}
 }
+#endif
 
 void parse_cmdline(void)
 {
@@ -717,6 +753,7 @@ void handle_hw_conf(cmd_tbl_t *cmdtp, struct fdt_header *working_fdt, struct hw_
 	free(hw_conf->overlay_file);
 #endif
 
+#ifdef CONFIG_RK3568_TB3N
 	if (hw_conf->uart4 == 1)
 		set_hw_property(working_fdt, "/serial@fe680000", "status", "okay", 5);
 	else if (hw_conf->uart4 == -1)
@@ -781,4 +818,23 @@ void handle_hw_conf(cmd_tbl_t *cmdtp, struct fdt_header *working_fdt, struct hw_
 		set_hw_property(working_fdt, "/uart8_enable", "status", "okay", 5);
 	else if (hw_conf->com2 == -1)
 		set_hw_property(working_fdt, "/uart8_enable", "status", "disabled", 9);
+#endif
+
+#ifdef CONFIG_RK3566_TB3
+	if (hw_conf->hdmi == 1) {
+		set_hw_property(working_fdt, "/hdmi@fe0a0000", "status", "okay", 5);
+		set_hw_property(working_fdt, "/hdmi@fe0a0000/ports/port@0/endpoint@0", "status", "okay", 5);
+	} else if (hw_conf->hdmi == -1) {
+		set_hw_property(working_fdt, "/hdmi@fe0a0000", "status", "disabled", 9);
+		set_hw_property(working_fdt, "/hdmi@fe0a0000/ports/port@0/endpoint@0", "status", "disabled", 9);
+	}
+
+	if (hw_conf->dsi0 == 1) {
+		set_hw_property(working_fdt, "/dsi@fe060000", "status", "okay", 5);
+		set_hw_property(working_fdt, "/dsi@fe060000/ports/port@0/endpoint@1", "status", "okay", 5);
+	} else if (hw_conf->dsi0 == -1) {
+		set_hw_property(working_fdt, "/dsi@fe060000", "status", "disabled", 9);
+		set_hw_property(working_fdt, "/dsi@fe060000/ports/port@0/endpoint@1", "status", "disabled", 9);
+	}
+#endif
 }

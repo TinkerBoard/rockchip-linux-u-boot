@@ -256,6 +256,7 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 	printf("config.txt valid = %d\n", hw_conf.valid);
 	if(hw_conf.valid == 1) {
 		printf("config on: 1, config off: -1, no config: 0\n");
+#ifdef CONFIG_RK3568_TB3N
 		printf("intf.uart4 = %d\n", hw_conf.uart4);
 		printf("intf.i2c5 = %d\n", hw_conf.i2c5);
 		printf("intf.uart9 = %d\n", hw_conf.uart9);
@@ -268,6 +269,11 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 		printf("intf.i2s3_2ch = %d\n", hw_conf.i2s3_2ch);
 		printf("conf.COM1 = %d\n", hw_conf.com1);
 		printf("conf.COM2 = %d\n", hw_conf.com2);
+#endif
+#ifdef CONFIG_RK3566_TB3
+		printf("conf.hdmi = %d\n", hw_conf.hdmi);
+		printf("conf.dsi0 = %d\n", hw_conf.dsi0);
+#endif
 		printf("conf.auto_ums = %d\n", hw_conf.auto_ums);
 
 		for (int i = 0; i < hw_conf.overlay_count; i++)
@@ -360,7 +366,9 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 		if(hw_conf.valid)
 			handle_hw_conf(NULL, working_fdt, &hw_conf);
 
+#ifdef CONFIG_RK3568_TB3N
 		set_lan_status(working_fdt);
+#endif
 	}
 
 	return 0;
