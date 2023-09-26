@@ -85,8 +85,18 @@ static unsigned long get_intf_value(char *text, struct hw_config *hw_conf)
 {
 	int i = 0;
 
+	if(memcmp(text, "fiq_debugger=", 13) == 0) {
+		i = 13;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->fiq_debugger = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->fiq_debugger = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
 #ifdef CONFIG_RK3568_TB3N
-	if(memcmp(text, "uart4=", 6) == 0) {
+	} else if(memcmp(text, "uart4=", 6) == 0) {
 		i = 6;
 		if(memcmp(text + i, "on", 2) == 0) {
 			hw_conf->uart4 = 1;
@@ -216,16 +226,241 @@ static unsigned long get_intf_value(char *text, struct hw_config *hw_conf)
 			i = i + 3;
 		} else
 			goto invalid_line;
-	} else if(memcmp(text, "fiq_debugger=", 13) == 0) {
-		i = 13;
+#endif
+#ifdef CONFIG_RK3566_TB3
+	} else if(memcmp(text, "uart0=", 6) == 0) {
+		i = 6;
 		if(memcmp(text + i, "on", 2) == 0) {
-			hw_conf->fiq_debugger = 1;
+			hw_conf->uart0 = 1;
 			i = i + 2;
+			hw_conf->pwm0 = -1;
+			hw_conf->pwm1 = -1;
+			hw_conf->pwm2 = -1;
+			hw_conf->pwm5 = -1;
 		} else if(memcmp(text + i, "off", 3) == 0) {
-			hw_conf->fiq_debugger = -1;
+			hw_conf->uart0 = -1;
 			i = i + 3;
 		} else
 			goto invalid_line;
+	} else if(memcmp(text, "uart1=", 6) == 0) {
+		i = 6;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->uart1 = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->uart1 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "uart4=", 6) == 0) {
+		i = 6;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->uart4 = 1;
+			i = i + 2;
+			hw_conf->pwm8 = -1;
+			hw_conf->pwm9 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->uart4 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "i2c1=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->i2c1 = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->i2c1 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "i2c5=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->i2c5 = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->i2c5 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "i2s3_2ch=", 9) == 0) {
+		i = 9;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->i2s3_2ch = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->i2s3_2ch = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "spi2=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->spi2 = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->spi2 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "spi3=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->spi3 = 1;
+			i = i + 2;
+			hw_conf->pwm12 = -1;
+			hw_conf->pwm13 = -1;
+			hw_conf->pwm14 = -1;
+			hw_conf->pwm15 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->spi3 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "spdif_8ch=", 10) == 0) {
+		i = 10;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->spdif_8ch = 1;
+			i = i + 2;
+			hw_conf->pwm15 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->spdif_8ch = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm0=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm0 = 1;
+			i = i + 2;
+			hw_conf->uart0 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm0 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm1=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm1 = 1;
+			i = i + 2;
+			hw_conf->uart0 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm1 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm2=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm2 = 1;
+			i = i + 2;
+			hw_conf->uart0 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm2 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm5=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm5 = 1;
+			i = i + 2;
+			hw_conf->uart0 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm5 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm7=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm7 = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm7 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm8=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm8 = 1;
+			i = i + 2;
+			hw_conf->uart4 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm8 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm9=", 5) == 0) {
+		i = 5;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm9 = 1;
+			i = i + 2;
+			hw_conf->uart4 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm9 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm12=", 6) == 0) {
+		i = 6;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm12 = 1;
+			i = i + 2;
+			hw_conf->spi3 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm12 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm13=", 6) == 0) {
+		i = 6;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm13 = 1;
+			i = i + 2;
+			hw_conf->spi3 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm13 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm14=", 6) == 0) {
+		i = 6;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm14 = 1;
+			i = i + 2;
+			hw_conf->spi3 = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm14 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "pwm15=", 6) == 0) {
+		i = 6;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->pwm15 = 1;
+			i = i + 2;
+			hw_conf->spi3 = -1;
+			hw_conf->spdif_8ch = -1;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->pwm15 = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+	} else if(memcmp(text, "xin32k=", 7) == 0) {
+		i = 7;
+		if(memcmp(text + i, "on", 2) == 0) {
+			hw_conf->xin32k = 1;
+			i = i + 2;
+		} else if(memcmp(text + i, "off", 3) == 0) {
+			hw_conf->xin32k = -1;
+			i = i + 3;
+		} else
+			goto invalid_line;
+#endif
 	} else
 		goto invalid_line;
 
@@ -244,7 +479,6 @@ invalid_line:
 		if(*(text + (i++)) == 0x0a)
 			break;
 	}
-#endif
 	return i;
 }
 
@@ -821,6 +1055,111 @@ void handle_hw_conf(cmd_tbl_t *cmdtp, struct fdt_header *working_fdt, struct hw_
 #endif
 
 #ifdef CONFIG_RK3566_TB3
+	if (hw_conf->uart0 == 1)
+		set_hw_property(working_fdt, "/serial@fdd50000", "status", "okay", 5);
+	else if (hw_conf->uart0 == -1)
+		set_hw_property(working_fdt, "/serial@fdd50000", "status", "disabled", 9);
+
+	if (hw_conf->uart1 == 1)
+		set_hw_property(working_fdt, "/serial@fe650000", "status", "okay", 5);
+	else if (hw_conf->uart1 == -1)
+		set_hw_property(working_fdt, "/serial@fe650000", "status", "disabled", 9);
+
+	if (hw_conf->uart4 == 1)
+		set_hw_property(working_fdt, "/serial@fe680000", "status", "okay", 5);
+	else if (hw_conf->uart4 == -1)
+		set_hw_property(working_fdt, "/serial@fe680000", "status", "disabled", 9);
+
+	if (hw_conf->i2c1 == 1)
+		set_hw_property(working_fdt, "/i2c@fe5a0000", "status", "okay", 5);
+	else if (hw_conf->i2c1 == -1)
+		set_hw_property(working_fdt, "/i2c@fe5a0000", "status", "disabled", 9);
+
+	if (hw_conf->i2c5 == 1)
+		set_hw_property(working_fdt, "/i2c@fe5e0000", "status", "okay", 5);
+	else if (hw_conf->i2c5 == -1)
+		set_hw_property(working_fdt, "/i2c@fe5e0000", "status", "disabled", 9);
+
+	if (hw_conf->i2s3_2ch == 1)
+		set_hw_property(working_fdt, "/i2s@fe430000", "status", "okay", 5);
+	else if (hw_conf->i2s3_2ch == -1)
+		set_hw_property(working_fdt, "/i2s@fe430000", "status", "disabled", 9);
+
+	if (hw_conf->spi2 == 1)
+		set_hw_property(working_fdt, "/spi@fe630000", "status", "okay", 5);
+	else if (hw_conf->spi2 == -1)
+		set_hw_property(working_fdt, "/spi@fe630000", "status", "disabled", 9);
+
+	if (hw_conf->spi3 == 1)
+		set_hw_property(working_fdt, "/spi@fe640000", "status", "okay", 5);
+	else if (hw_conf->spi3 == -1)
+		set_hw_property(working_fdt, "/spi@fe640000", "status", "disabled", 9);
+
+	if (hw_conf->spdif_8ch == 1)
+		set_hw_property(working_fdt, "/spdif@fe460000", "status", "okay", 5);
+	else if (hw_conf->spdif_8ch == -1)
+		set_hw_property(working_fdt, "/spdif@fe460000", "status", "disabled", 9);
+
+	if (hw_conf->pwm0 == 1)
+		set_hw_property(working_fdt, "/pwm@fdd70000", "status", "okay", 5);
+	else if (hw_conf->pwm0 == -1)
+		set_hw_property(working_fdt, "/pwm@fdd70000", "status", "disabled", 9);
+
+	if (hw_conf->pwm1 == 1)
+		set_hw_property(working_fdt, "/pwm@fdd70010", "status", "okay", 5);
+	else if (hw_conf->pwm1 == -1)
+		set_hw_property(working_fdt, "/pwm@fdd70010", "status", "disabled", 9);
+
+	if (hw_conf->pwm2 == 1)
+		set_hw_property(working_fdt, "/pwm@fdd70020", "status", "okay", 5);
+	else if (hw_conf->pwm2 == -1)
+		set_hw_property(working_fdt, "/pwm@fdd70020", "status", "disabled", 9);
+
+	if (hw_conf->pwm5 == 1)
+		set_hw_property(working_fdt, "/pwm@fe6e0010", "status", "okay", 5);
+	else if (hw_conf->pwm5 == -1)
+		set_hw_property(working_fdt, "/pwm@fe6e0010", "status", "disabled", 9);
+
+	if (hw_conf->pwm7 == 1)
+		set_hw_property(working_fdt, "/pwm@fe6e0030", "status", "okay", 5);
+	else if (hw_conf->pwm7 == -1)
+		set_hw_property(working_fdt, "/pwm@fe6e0030", "status", "disabled", 9);
+
+	if (hw_conf->pwm8 == 1)
+		set_hw_property(working_fdt, "/pwm@fe6f0000", "status", "okay", 5);
+	else if (hw_conf->pwm8 == -1)
+		set_hw_property(working_fdt, "/pwm@fe6f0000", "status", "disabled", 9);
+
+	if (hw_conf->pwm9 == 1)
+		set_hw_property(working_fdt, "/pwm@fe6f0010", "status", "okay", 5);
+	else if (hw_conf->pwm9 == -1)
+		set_hw_property(working_fdt, "/pwm@fe6f0010", "status", "disabled", 9);
+
+	if (hw_conf->pwm12 == 1)
+		set_hw_property(working_fdt, "/pwm@fe700000", "status", "okay", 5);
+	else if (hw_conf->pwm12 == -1)
+		set_hw_property(working_fdt, "/pwm@fe700000", "status", "disabled", 9);
+
+	if (hw_conf->pwm13 == 1)
+		set_hw_property(working_fdt, "/pwm@fe700010", "status", "okay", 5);
+	else if (hw_conf->pwm13 == -1)
+		set_hw_property(working_fdt, "/pwm@fe700010", "status", "disabled", 9);
+
+	if (hw_conf->pwm14 == 1)
+		set_hw_property(working_fdt, "/pwm@fe700020", "status", "okay", 5);
+	else if (hw_conf->pwm14 == -1)
+		set_hw_property(working_fdt, "/pwm@fe700020", "status", "disabled", 9);
+
+	if (hw_conf->pwm15 == 1)
+		set_hw_property(working_fdt, "/pwm@fe700030", "status", "okay", 5);
+	else if (hw_conf->pwm15 == -1)
+		set_hw_property(working_fdt, "/pwm@fe700030", "status", "disabled", 9);
+
+	if (hw_conf->xin32k == 1)
+		set_hw_property(working_fdt, "/xin32k", "status", "okay", 5);
+	else if (hw_conf->xin32k == -1)
+		set_hw_property(working_fdt, "/xin32k", "status", "disabled", 9);
+
 	if (hw_conf->hdmi == 1) {
 		set_hw_property(working_fdt, "/hdmi@fe0a0000", "status", "okay", 5);
 		set_hw_property(working_fdt, "/hdmi@fe0a0000/ports/port@0/endpoint@0", "status", "okay", 5);

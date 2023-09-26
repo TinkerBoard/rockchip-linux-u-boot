@@ -271,6 +271,27 @@ int boot_relocate_fdt(struct lmb *lmb, char **of_flat_tree, ulong *of_size)
 		printf("conf.COM2 = %d\n", hw_conf.com2);
 #endif
 #ifdef CONFIG_RK3566_TB3
+		printf("intf.uart0 = %d\n", hw_conf.uart0);
+		printf("intf.uart1 = %d\n", hw_conf.uart1);
+		printf("intf.uart4 = %d\n", hw_conf.uart1);
+		printf("intf.i2c1 = %d\n", hw_conf.i2c1);
+		printf("intf.i2c5 = %d\n", hw_conf.i2c5);
+		printf("intf.i2s3_2ch = %d\n", hw_conf.i2s3_2ch);
+		printf("intf.spi2 = %d\n", hw_conf.spi2);
+		printf("intf.spi3 = %d\n", hw_conf.spi3);
+		printf("intf.spdif_8ch = %d\n", hw_conf.spdif_8ch);
+		printf("intf.pwm0 = %d\n", hw_conf.pwm0);
+		printf("intf.pwm1 = %d\n", hw_conf.pwm1);
+		printf("intf.pwm2 = %d\n", hw_conf.pwm2);
+		printf("intf.pwm5 = %d\n", hw_conf.pwm5);
+		printf("intf.pwm7 = %d\n", hw_conf.pwm7);
+		printf("intf.pwm8 = %d\n", hw_conf.pwm8);
+		printf("intf.pwm9 = %d\n", hw_conf.pwm9);
+		printf("intf.pwm12 = %d\n", hw_conf.pwm12);
+		printf("intf.pwm13 = %d\n", hw_conf.pwm13);
+		printf("intf.pwm14 = %d\n", hw_conf.pwm14);
+		printf("intf.pwm15 = %d\n", hw_conf.pwm15);
+		printf("intf.xin32k = %d\n", hw_conf.xin32k);
 		printf("conf.hdmi = %d\n", hw_conf.hdmi);
 		printf("conf.dsi0 = %d\n", hw_conf.dsi0);
 #endif
